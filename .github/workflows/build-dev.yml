@@ -74,7 +74,7 @@ jobs:
 
     - name: Upload development build
       if: matrix.python-version == '3.9'  # 한 버전만 업로드
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dev-build-${{ matrix.os }}-${{ github.sha }}
         path: dist/iptime-manager*
