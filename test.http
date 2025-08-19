@@ -1,0 +1,18 @@
+### 포트 포워딩 리스트
+GET http://localhost:6000/api/portforward
+
+### 포트 포워딩 단건 조회
+GET http://localhost:6000/api/portforward/test
+
+### 포트 포워딩 수정
+PUT http://localhost:6000/api/portforward/test
+Content-Type: application/json
+
+{
+  "internal_ip": "192.168.0.7",
+  "external_port": "30379"
+}
+
+### 포트 포워딩 삭제
+DELETE http://localhost:6000/api/portforward/test
+Content-Type: application/json
