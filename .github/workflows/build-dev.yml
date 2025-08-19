@@ -1,0 +1,81 @@
+name: Build Development
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.8', '3.9', '3.10']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller pytest
+
+    - name: Run tests
+      run: |
+        # pytest tests/ -v  # 테스트가 있을 경우
+        echo "Tests would run here"
+
+    - name: Build executable (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        pyinstaller \
+          --name iptime-manager \
+          --onefile \
+          --clean \
+          --noconfirm \
+          --add-data "src:src" \
+          --hidden-import requests \
+          iptime_cli.py
+
+    - name: Build executable (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        pyinstaller `
+          --name iptime-manager `
+          --onefile `
+          --clean `
+          --noconfirm `
+          --add-data "src;src" `
+          --hidden-import requests `
+          iptime_cli.py
+
+    - name: Test executable (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        chmod +x dist/iptime-manager
+        ./dist/iptime-manager --help
+
+    - name: Test executable (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        dist\iptime-manager.exe --help
+
+    - name: Upload development build
+      if: matrix.python-version == '3.9'  # 한 버전만 업로드
+      uses: actions/upload-artifact@v3
+      with:
+        name: dev-build-${{ matrix.os }}-${{ github.sha }}
+        path: dist/iptime-manager*
+        retention-days: 7  # 개발 빌드는 7일만 보관

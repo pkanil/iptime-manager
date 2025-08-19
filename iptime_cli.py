@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """
-ipTIME 포트포워드 관리 예제
+ipTIME 포트포워드 관리 도구
 """
 import sys
 import json
+import logging
 from src.iptime_api import IptimeAPI
 from src.port_forward import PortForwardManager
+
+# 기본적으로 WARNING 레벨만 표시
+logging.basicConfig(level=logging.WARNING, format='%(message)s')
 
 
 def cli_interface():
@@ -16,6 +20,7 @@ def cli_interface():
     parser.add_argument('--host', required=True, help='공유기 IP 주소')
     parser.add_argument('--username', default='admin', help='관리자 계정')
     parser.add_argument('--password', required=True, help='관리자 비밀번호')
+    parser.add_argument('--debug', action='store_true', help='디버그 모드 활성화')
     
     subparsers = parser.add_subparsers(dest='command', help='명령어')
     
@@ -48,6 +53,13 @@ def cli_interface():
     delete_parser.add_argument('rule', help='규칙 ID (숫자) 또는 이름 (문자열)')
     
     args = parser.parse_args()
+    
+    # 디버그 모드 설정
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        # 모든 모듈의 로거 레벨 설정
+        logging.getLogger('src.iptime_api').setLevel(logging.DEBUG)
+        logging.getLogger('src.port_forward').setLevel(logging.DEBUG)
     
     # API 초기화
     api = IptimeAPI(args.host, args.username, args.password)

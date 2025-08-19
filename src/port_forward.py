@@ -10,6 +10,7 @@ import requests
 from .iptime_api import IptimeAPI
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 
 class PortForwardManager:
@@ -38,7 +39,8 @@ class PortForwardManager:
             
             # 세션 타임아웃 체크
             if 'login_session' in response and 'session_timeout' in response:
-                logger.info("세션 타임아웃 감지, 재로그인 시도...")
+                # logger.info("세션 타임아웃 감지, 재로그인 시도...")
+                pass
                 # 새로운 세션으로 재시도
                 self.api.session = requests.Session()
                 self.api.session.headers.update({
@@ -83,7 +85,7 @@ class PortForwardManager:
                     return []
             
             # 디버그: 응답 내용 일부 출력
-            logger.debug(f"포트포워드 페이지 응답 (처음 1000자): {response[:1000]}")
+            # logger.debug(f"포트포워드 페이지 응답 (처음 1000자): {response[:1000]}")
                 
             rules = []
             
@@ -113,7 +115,7 @@ class PortForwardManager:
                         'internal_port': int_sport
                     })
                     
-            logger.info(f"포트포워드 규칙 {len(rules)}개 조회 완료")
+            # logger.info(f"포트포워드 규칙 {len(rules)}개 조회 완료")
             return rules
             
         except Exception as e:
@@ -231,7 +233,7 @@ class PortForwardManager:
             )
             
             if response:
-                logger.info(f"포트포워드 규칙 추가 성공: {description}")
+                # logger.info(f"포트포워드 규칙 추가 성공: {description}")
                 return True
                 
             return False
@@ -312,7 +314,7 @@ class PortForwardManager:
             )
             
             if response:
-                logger.info(f"포트포워드 규칙 ID {rule_id} 삭제 성공")
+                # logger.info(f"포트포워드 규칙 ID {rule_id} 삭제 성공")
                 return True
                 
             return False
@@ -417,7 +419,7 @@ class PortForwardManager:
             )
             
             if response:
-                logger.info(f"포트포워드 규칙 ID {rule_id} 수정 성공")
+                # logger.info(f"포트포워드 규칙 ID {rule_id} 수정 성공")
                 return True
                 
             return False

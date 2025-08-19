@@ -12,8 +12,9 @@ import urllib3
 # SSL 경고 비활성화
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-logging.basicConfig(level=logging.DEBUG)
+# 로깅 설정
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 
 class IptimeAPI:
@@ -60,13 +61,13 @@ class IptimeAPI:
         """세션 정보 획득"""
         try:
             url = f"{self.base_url}/sess-bin/login_session.cgi"
-            logger.info(f"세션 정보 요청: {url}")
+            # logger.info(f"세션 정보 요청: {url}")
             response = self.session.get(url, verify=False, timeout=10)
             response.raise_for_status()
             
             # 세션 정보 파싱
             content = response.text
-            logger.debug(f"응답 내용 (처음 500자): {content[:500]}")
+            # logger.debug(f"응답 내용 (처음 500자): {content[:500]}")
             session_info = {}
             
             # captcha 추출
@@ -84,7 +85,7 @@ class IptimeAPI:
             if session_id_match:
                 session_info['session_id'] = session_id_match.group(1)
             
-            logger.info(f"세션 정보 추출: {session_info}")
+            # logger.info(f"세션 정보 추출: {session_info}")
             return session_info
             
         except Exception as e:
@@ -100,7 +101,8 @@ class IptimeAPI:
                 self.session_id = session_info.get('session_id', '')
                 self.captcha = session_info.get('captcha_on', '0')
             except:
-                logger.info("세션 정보 획득 실패, 기본값 사용")
+                # logger.info("세션 정보 획득 실패, 기본값 사용")
+                pass
                 self.session_id = ''
                 self.captcha = '0'
             
@@ -115,7 +117,7 @@ class IptimeAPI:
                 'captcha_code': ''
             }
             
-            logger.info(f"로그인 시도: {self.base_url}/sess-bin/login_handler.cgi")
+            # logger.info(f"로그인 시도: {self.base_url}/sess-bin/login_handler.cgi")
             
             # 브라우저와 동일한 헤더 설정
             headers = {
@@ -132,9 +134,9 @@ class IptimeAPI:
                 allow_redirects=False  # 리다이렉트를 따르지 않음
             )
             
-            logger.debug(f"로그인 응답 상태: {response.status_code}")
-            logger.debug(f"쿠키: {self.session.cookies}")
-            logger.debug(f"응답 내용 (처음 500자): {response.text[:500]}")
+            # logger.debug(f"로그인 응답 상태: {response.status_code}")
+            # logger.debug(f"쿠키: {self.session.cookies}")
+            # logger.debug(f"응답 내용 (처음 500자): {response.text[:500]}")
             
             # JavaScript로 쿠키를 설정하는 경우 처리 (200 응답)
             if 'setCookie' in response.text:
@@ -142,24 +144,24 @@ class IptimeAPI:
                 session_match = re.search(r"setCookie\('([^']+)'\)", response.text)
                 if session_match:
                     session_id = session_match.group(1)
-                    logger.info(f"세션 ID 추출 성공: {session_id}")
+                    # logger.info(f"세션 ID 추출 성공: {session_id}")
                     # 쿠키 설정
                     self.session.cookies.set('efm_session_id', session_id, domain=self.host.split(':')[0], path='/')
                     self.logged_in = True
                     return True
             # 502 에러가 와도 리다이렉트 스크립트가 있으면 성공으로 간주
             elif 'top.location' in response.text and 'login_session' not in response.text:
-                logger.info("로그인 성공 (리다이렉트 확인)")
+                # logger.info("로그인 성공 (리다이렉트 확인)")
                 self.logged_in = True
                 return True
             elif response.status_code == 200:
                 # 쿠키 확인 또는 응답 내용 확인
                 if 'efm_session_id' in self.session.cookies or 'sess_id' in self.session.cookies:
-                    logger.info("로그인 성공 (쿠키 확인)")
+                    # logger.info("로그인 성공 (쿠키 확인)")
                     return True
                 # 응답 내용에서 성공 여부 확인
                 elif 'timepro.cgi' in response.text:
-                    logger.info("로그인 성공 (페이지 확인)")
+                    # logger.info("로그인 성공 (페이지 확인)")
                     return True
                     
             logger.error("로그인 실패")
@@ -174,7 +176,7 @@ class IptimeAPI:
         try:
             response = self.session.get(f"{self.base_url}/sess-bin/logout.cgi")
             if response.status_code == 200:
-                logger.info("로그아웃 성공")
+                # logger.info("로그아웃 성공")
                 return True
             return False
         except Exception as e:
